@@ -1,0 +1,132 @@
+{
+  "entities": {
+    "PortfolioProfile": {
+      "title": "PortfolioProfile",
+      "description": "Public developer portfolio profile and contact configuration owned by Vikas Kumar.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "UID of the portfolio owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name displayed in the portfolio.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "roleHeadline": {
+          "type": "string",
+          "description": "Role headline displayed in the hero section.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "heroIntro": {
+          "type": "string",
+          "description": "Short introduction paragraph in the hero section.",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "contactEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Public contact email address for portfolio inquiries.",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "githubUrl": {
+          "type": "string",
+          "description": "Optional GitHub profile URL.",
+          "maxLength": 250
+        },
+        "linkedinUrl": {
+          "type": "string",
+          "description": "Optional LinkedIn profile URL.",
+          "maxLength": 250
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the profile document was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the profile document was last updated."
+        }
+      },
+      "required": [
+        "ownerId",
+        "name",
+        "roleHeadline",
+        "heroIntro",
+        "contactEmail",
+        "githubUrl",
+        "linkedinUrl",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ContactInquiry": {
+      "title": "ContactInquiry",
+      "description": "A public contact inquiry submitted to the portfolio owner.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the visitor submitting the inquiry.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the visitor.",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject of the inquiry.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "message": {
+          "type": "string",
+          "description": "Message body of the inquiry.",
+          "minLength": 2,
+          "maxLength": 2000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server-generated timestamp when the inquiry was created."
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "subject",
+        "message",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/portfolios/{portfolioId}": {
+      "schema": {
+        "$ref": "#/entities/PortfolioProfile"
+      },
+      "description": "Stores the public portfolio metadata."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": {
+        "$ref": "#/entities/ContactInquiry"
+      },
+      "description": "Stores public contact inquiries submitted by visitors. Visitors can create valid inquiries but cannot read, update, or delete them."
+    }
+  }
+}

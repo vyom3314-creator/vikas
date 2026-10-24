@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1 & Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Validation Blueprint: ContactInquiry
+    function isValidContactInquiry(data) {
+      return data.keys().hasAll([
+          'name',
+          'email',
+          'subject',
+          'message',
+          'createdAt'
+        ]) &&
+        data.keys().hasOnly([
+          'name',
+          'email',
+          'subject',
+          'message',
+          'createdAt'
+        ]) &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 160 && data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$') &&
+        data.subject is string && data.subject.size() >= 1 && data.subject.size() <= 160 &&
+        data.message is string && data.message.size() >= 2 && data.message.size() <= 2000 &&
+        data.createdAt is timestamp;
+    }
+
+    // Collection 1: /portfolios/{portfolioId}
+    match /portfolios/{portfolioId} {
+      allow get: if isValidId(portfolioId);
+      allow list, create, update, delete: if false;
+    }
+
+    // Collection 2: /inquiries/{inquiryId}
+    // Visitors can submit valid inquiries but cannot read, edit, or delete inquiries.
+    match /inquiries/{inquiryId} {
+      allow get, list, update, delete: if false;
+
+      allow create: if isValidId(inquiryId) &&
+        isValidContactInquiry(incoming()) &&
+        incoming().createdAt == request.time;
+    }
+  }
+}
